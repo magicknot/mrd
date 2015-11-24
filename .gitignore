@@ -1,29 +1,55 @@
-# Created by https://www.gitignore.io/api/java,gradle,osx,linux,windows,intellij,sublimetext,eclipse,vim,emacs
+# Created by https://www.gitignore.io/api/vim,emacs,linux,osx,windows,intellij,eclipse,sublimetext,sbt,scala,java,maven,playframework
 
-### Java ###
-*.class
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
-*.jar
-*.war
-*.ear
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+### Vim ###
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+*~
 
 
-### Gradle ###
-.gradle
-build/
+### Emacs ###
+# -*- mode: gitignore; -*-
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
 
-# Ignore Gradle GUI config
-gradle-app.setting
+# Org-mode
+.org-id-locations
+*_archive
 
-# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
-!gradle-wrapper.jar
+# flymake-mode
+*_flymake.*
+
+# eshell files
+/eshell/history
+/eshell/lastdir
+
+# elpa packages
+/elpa/
+
+# reftex files
+*.rel
+
+# AUCTeX auto folder
+/auto/
+
+# cask packages
+.cask/
+
+
+### Linux ###
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
 
 
 ### OSX ###
@@ -52,16 +78,6 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
-
-
-### Linux ###
-*~
-
-# KDE directory preferences
-.directory
-
-# Linux trash folder which might appear on any partition or disk
-.Trash-*
 
 
 ### Windows ###
@@ -134,23 +150,6 @@ crashlytics.properties
 crashlytics-build.properties
 
 
-### SublimeText ###
-# cache files for sublime text
-*.tmlanguage.cache
-*.tmPreferences.cache
-*.stTheme.cache
-
-# workspace files are user-specific
-*.sublime-workspace
-
-# project files should be checked into the repository, unless a significant
-# proportion of contributors will probably not be using SublimeText
-# *.sublime-project
-
-# sftp configuration file
-sftp-config.json
-
-
 ### Eclipse ###
 *.pydevproject
 .metadata
@@ -193,45 +192,83 @@ local.properties
 .texlipse
 
 
-### Vim ###
-[._]*.s[a-w][a-z]
-[._]s[a-w][a-z]
-*.un~
-Session.vim
-.netrwhist
-*~
+### SublimeText ###
+# cache files for sublime text
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+
+# workspace files are user-specific
+*.sublime-workspace
+
+# project files should be checked into the repository, unless a significant
+# proportion of contributors will probably not be using SublimeText
+# *.sublime-project
+
+# sftp configuration file
+sftp-config.json
 
 
-### Emacs ###
-# -*- mode: gitignore; -*-
-*~
-\#*\#
-/.emacs.desktop
-/.emacs.desktop.lock
-*.elc
-auto-save-list
-tramp
-.\#*
+### SBT ###
+# Simple Build Tool
+# http://www.scala-sbt.org/release/docs/Getting-Started/Directories.html#configuring-version-control
 
-# Org-mode
-.org-id-locations
-*_archive
+target/
+lib_managed/
+src_managed/
+project/boot/
+.history
+.cache
 
-# flymake-mode
-*_flymake.*
 
-# eshell files
-/eshell/history
-/eshell/lastdir
+### Scala ###
+*.class
+*.log
 
-# elpa packages
-/elpa/
+# sbt specific
+.lib/
+dist/*
+project/plugins/project/
 
-# reftex files
-*.rel
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
 
-# AUCTeX auto folder
-/auto/
 
-# cask packages
-.cask/
+### Java ###
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+
+### Maven ###
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+
+### PlayFramework ###
+# Ignore Play! working directory #
+/db
+.eclipse
+/lib/
+/logs/
+/modules
+/project/project
+/project/target
+test-result
+server.pid
+*.eml
+/dist/
