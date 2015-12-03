@@ -2,4 +2,5 @@ package domain
 
 import java.time.LocalDateTime
 
-case class MedicalRecord(creator: Doctor, kind: Speciality, creationDate: LocalDateTime, content: String)
+case class MedicalRecord(creator: Physician, kind: Speciality, creationDate: LocalDateTime = LocalDateTime.now(),
+                         content: String, id: Long)
