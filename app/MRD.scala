@@ -1,12 +1,18 @@
 import java.time.LocalDateTime
 
 import controllers.Application
-import domain.{Cardiology, Physician, Patient}
+import domain.{Database, Cardiology}
 
 
 object MRD extends App {
-  val d = Physician("Antonio", Cardiology, 0l)
-  val p = Patient("Manuel", LocalDateTime.now(), id = 0l)
+  val d = Database.addPhysician("Antonio", Cardiology)
+  val p = Database.addPatient("Manuel", LocalDateTime.now())
 
-  Application.createRecord(d, p, Cardiology, "Teve um enfarte")
+  Application.createRecord(d, p, Cardiology, "Teve um enfarte") match {
+    case Right(id) =>
+      println(Application.readRecord(d, p.id, id).merge)
+      Application.updateRecord(d, id, "Teve um enfarte bastante severo")
+      println(Application.readRecord(d, p.id, id).merge)
+    case Left(error) => println(error)
+  }
 }

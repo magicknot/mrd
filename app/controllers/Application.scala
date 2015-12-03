@@ -7,27 +7,64 @@ import stapl.core.{NotApplicable, Deny, Permit}
 import stapl.core.pdp.PDP
 
 object Application extends Controller {
-  private val insufficient_permissions = "You don't have enough permissions to preform this action."
+  private val insufficientPermissions = "You don't have enough permissions to preform this action."
+  private val operationNotAllowed = "Operation not allowed"
 
   def index = Action {
     Ok(views.html.index("Your new application is ready."))
   }
 
   def createRecord(physician: Physician, patient: Patient,
-                   category: Speciality, content: String): Unit = {
+                   category: Speciality, content: String): Either[String, Long] = {
     val pdp = new PDP(writePolicies)
 
     pdp.evaluate("physician", "write", "medicalrecord",
-      subject.role -> physician.speciality.toString, resource.kind -> category.toString).decision match {
+      subject.speciality -> physician.speciality.toString, resource.kind -> category.toString).decision match {
       case Permit =>
-        println("Conseguiste criar o record")
+        Right(Database.addMedicalRecord(physician, category, patient, content).id)
       case Deny =>
-        println(insufficient_permissions)
+        Left(insufficientPermissions)
       case NotApplicable =>
-        println("Operation not allowed")
+        Left(operationNotAllowed)
     }
   }
 
-  def readRecord(doctor: Physician, medicalRecord: Long) = ???
-  def updateRecord(doctor: Physician, medicalRecord: Long, content: String) = ???
+  def readRecord(physician: Physician, patient: Long, medicalRecord: Long): Either[String, String] = {
+    Database.getMedicalRecord(medicalRecord) match {
+      case Some(record) =>
+        val pdp = new PDP(readPolicies)
+
+        pdp.evaluate("physician", "read", "medicalrecord",
+          subject.speciality -> physician.speciality.toString,
+          subject.treatingPatients -> physician.treatingPatients.map(_.id).toList,
+          resource.kind -> record.kind.toString, resource.ownerId -> patient).decision match {
+          case Permit =>
+            Right(record.content)
+          case Deny =>
+            Left(insufficientPermissions)
+          case NotApplicable =>
+            Left(operationNotAllowed)
+        }
+      case _ => Left("Medical Record not found")
+    }
+  }
+
+  def updateRecord(physician: Physician, medicalRecord: Long, content: String): Either[String, Boolean] = {
+    Database.getMedicalRecord(medicalRecord) match {
+      case Some(record) =>
+        val pdp = new PDP(writePolicies)
+
+        pdp.evaluate("physician", "write", "medicalrecord",
+          subject.speciality -> physician.speciality.toString, resource.kind -> record.kind.toString).decision match {
+          case Permit =>
+            Right(Database.updateMedicalRecord(medicalRecord, content))
+          case Deny =>
+            Left(insufficientPermissions)
+          case NotApplicable =>
+            Left(operationNotAllowed)
+        }
+      case _ =>
+        Left("Medical Record not found")
+    }
+  }
 }
