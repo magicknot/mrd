@@ -2,7 +2,7 @@ package controllers
 
 import domain._
 import play.api.mvc.{Action, Controller}
-import policies.HospitalPolicy._
+import policies.HospitalPolicy
 import stapl.core.{NotApplicable, Deny, Permit}
 import stapl.core.pdp.PDP
 
@@ -15,11 +15,12 @@ object Application extends Controller {
   }
 
   def createRecord(physician: Physician, patient: Patient,
-                   category: Speciality, content: String): Either[String, Long] = {
-    val pdp = new PDP(writePolicies)
+                   category: Department, content: String): Either[String, Long] = {
+    val pdp = new PDP(HospitalPolicy.writePolicies)
 
     pdp.evaluate("physician", "write", "medicalrecord",
-      subject.speciality -> physician.speciality.toString, resource.kind -> category.toString).decision match {
+      HospitalPolicy.subject.department -> physician.department.toString,
+      HospitalPolicy.resource.department -> category.toString).decision match {
       case Permit =>
         Right(Database.addMedicalRecord(physician, category, patient, content).id)
       case Deny =>
@@ -32,12 +33,35 @@ object Application extends Controller {
   def readRecord(physician: Physician, patient: Long, medicalRecord: Long): Either[String, String] = {
     Database.getMedicalRecord(medicalRecord) match {
       case Some(record) =>
-        val pdp = new PDP(readPolicies)
+        val pdp = new PDP(HospitalPolicy.viewPolicies)
 
-        pdp.evaluate("physician", "read", "medicalrecord",
-          subject.speciality -> physician.speciality.toString,
-          subject.treatingPatients -> physician.treatingPatients.map(_.id).toList,
-          resource.kind -> record.kind.toString, resource.ownerId -> patient).decision match {
+        pdp.evaluate("physician", "view", "medicalrecord",
+          HospitalPolicy.subject.department -> physician.department.toString,
+          HospitalPolicy.physician.treatingPatients -> physician.treatingPatients.map(_.id).toList,
+          HospitalPolicy.resource.department -> record.department.toString,
+          HospitalPolicy.resource.ownerId -> patient).decision match {
+          case Permit =>
+            Right(record.content)
+          case Deny =>
+            Left(insufficientPermissions)
+          case NotApplicable =>
+            Left(operationNotAllowed)
+        }
+      case _ => Left("Medical Record not found")
+    }
+  }
+
+  def readRecord(physician: Nurse, patient: Long, medicalRecord: Long): Either[String, String] = {
+    Database.getMedicalRecord(medicalRecord) match {
+      case Some(record) =>
+        val pdp = new PDP(HospitalPolicy.viewPolicies)
+
+        pdp.evaluate("physician", "view", "medicalrecord",
+          HospitalPolicy.subject.department -> physician.department.toString,
+          HospitalPolicy.nurse.beginOfShift -> nurse.beginOfShift,
+          HospitalPolicy.nurse.endOfShift -> nurse.endOfShift,
+          HospitalPolicy.resource.department -> record.department.toString,
+          HospitalPolicy.resource.ownerId -> patient).decision match {
           case Permit =>
             Right(record.content)
           case Deny =>
@@ -52,10 +76,11 @@ object Application extends Controller {
   def updateRecord(physician: Physician, medicalRecord: Long, content: String): Either[String, Boolean] = {
     Database.getMedicalRecord(medicalRecord) match {
       case Some(record) =>
-        val pdp = new PDP(writePolicies)
+        val pdp = new PDP(HospitalPolicy.writePolicies)
 
         pdp.evaluate("physician", "write", "medicalrecord",
-          subject.speciality -> physician.speciality.toString, resource.kind -> record.kind.toString).decision match {
+          HospitalPolicy.subject.department -> physician.department.toString,
+          HospitalPolicy.resource.department -> record.department.toString).decision match {
           case Permit =>
             Right(Database.updateMedicalRecord(medicalRecord, content))
           case Deny =>
